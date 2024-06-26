@@ -10,7 +10,7 @@ const GetError = error {
 
 const Elem = struct {
     value: u32,
-    key: u32,
+    key: [*:0]const u8,
     is_used: bool,
 };
     
@@ -18,11 +18,15 @@ const capacity: usize = 32;
 var val: [capacity]Elem = undefined;
 var map_s: usize = 0;
 
-pub fn hash(n: u32) usize {
-    return (n * 10 + 3) / 2;
+pub fn hash(n: [*:0]const u8) usize {
+    var result: usize = 0;
+    for(0..std.mem.len(n)) |i| {
+        result += n[i] + 10 * 3;
+    }
+    return result;
 }
 
-pub fn insert(key: u32, value: u32) !void {
+pub fn insert(key: [*:0]const u8, value: u32) !void {
     if(map_s == capacity) return InsertError.MapFull;
     var index: usize = hash(key)%capacity;
     while(val[index].is_used == true) {
@@ -37,7 +41,7 @@ pub fn insert(key: u32, value: u32) !void {
     map_s += 1;
 }
 
-pub fn get(key: u32) !u32 {
+pub fn get(key: [*:0]const u8) !u32 {
     for(0..capacity) |i| {
         if(val[i].key == key) return val[i].value;
     }
@@ -45,10 +49,10 @@ pub fn get(key: u32) !u32 {
 }
 
 pub fn main() !void {
-    try insert(15, 32);
-    try insert(32, 16);        
-    try insert(12, 8);    
-    try insert(11, 2);        
-    const result: u32 = try get(15);
+    try insert("test", 32);
+    try insert("test1", 16);        
+    try insert("test2", 8);    
+    try insert("test3", 2);        
+    const result: u32 = try get("test3");
     std.debug.print("Hello, world! {d}\n", .{result});
 }
